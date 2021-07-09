@@ -1,0 +1,43 @@
+server {
+        root /var/www/html;
+        index index.html index.htm index.nginx-debian.html;
+        server_name www.i.byt.sl;
+        return 301 https://i.byt.sl$request_uri/webui;
+        listen [::]:443 ssl;
+        listen 443 ssl;
+        ssl_certificate /etc/nginx/ssl/i.byt.sl/cert.pem;
+        ssl_certificate_key /etc/nginx/ssl/i.byt.sl/key.pem;
+        ssl_dhparam /etc/nginx/ssl/i.byt.sl/dhparam.pem;
+}
+
+server {
+        root /var/www/html;
+        index index.html index.htm index.nginx-debian.html;
+        server_name i.byt.sl;
+        auth_basic "Login";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+        location / {
+                proxy_pass http://i.byt.sl:5001;
+        }
+
+        listen [::]:443 ssl;
+        listen 443 ssl;
+        ssl_certificate /etc/nginx/ssl/i.byt.sl/cert.pem;
+        ssl_certificate_key /etc/nginx/ssl/i.byt.sl/key.pem;
+        ssl_dhparam /etc/nginx/ssl/i.byt.sl/dhparam.pem;
+}
+
+server {
+        return 301 https://i.byt.sl$request_uri/webui;
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        server_name i.byt.sl www.i.byt.sl;
+}
+
+  listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/ipgw.io/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/ipgw.io/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+

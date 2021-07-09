@@ -1,0 +1,43 @@
+server {
+    server_name ipgw.io;
+    server_tokens off;
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name ipgw.io;
+
+    location /api/v0/add {
+        proxy_pass http://localhost:5001;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        allow all;
+    }
+
+    location /ipfs {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        allow all;
+    }
+
+    location / {
+        proxy_pass http://localhost:5001;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        deny all; # <- Deny other traffic
+    }
+
+    ssl_certificate /etc/letsencrypt/live/ipgw.io/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/ipgw.io/privkey.pem; # managed by Certbot
+
+}
+#server {
+#    if ($host =  ) {
+#        return 301 https://host
+#request_uri;
+#    } # managed by Certbot
+
+
+#        listen 80 ;
+#        listen [::]:80 ;
+#    server_name ;
+#    return 404; # managed by Certbot

@@ -1,0 +1,6 @@
+#!/bin/bash
+rm -rf .ipfs-cluster
+rm -rf ipfs-cluster-ctl
+rm -rf ipfs-cluster-service
+rm /usr/local/bin/ipfs-cluster-ctl
+rm /usr/local/bin/ipfs-cluster-service
