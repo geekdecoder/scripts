@@ -1,2 +1,2 @@
 # scripts
-Useful screipts for server administration
+Useful scripts for server administration
