@@ -1,0 +1,124 @@
+
+Setting up IPFS Server with Nginx and Gateway
+ June 16, 2021   Nginx
+
+In a previous article, we set up a private IPFS cluster. We now need a public IPFS gateway so files on the private cluster are accessible by the public. This gateway will run on one of the IPFS nodes in the cluster.
+
+We can use Nginx as a proxy to the local ipfs gateway that ships with the IPFS daemon (As a default for IPFS, the files and Webui are only accessable via localhost). So, set up a domain or subdomain pointing to one of the nodes.
+
+Start with an Update
+
+$ sudo apt update 
+$ sudo apt upgrade -y
+
+Install Nginx And Configure It.
+
+$ sudo apt install nginx -y
+
+Check status to make sure it started and is not throwing any errors:
+
+$ systemctl status nginx
+
+Results
+
+● nginx.service - A high performance web server and a reverse proxy server
+   Loaded: loaded (/lib/systemd/system/nginx.service; enabled; vendor preset: en
+   Active: active (running) since Wed 2021-06-16 22:59:51 UTC; 1min 44s ago
+     Docs: man:nginx(8)
+  Process: 13062 ExecStartPre=/usr/sbin/nginx -t -q -g daemon on; master_process
+  Process: 13063 ExecStart=/usr/sbin/nginx -g daemon on; master_process on; (cod
+ Main PID: 13064 (nginx)
+    Tasks: 2 (limit: 1163)
+   Memory: 5.3M
+   CGroup: /system.slice/nginx.service
+           ├─13064 nginx: master process /usr/sbin/nginx -g daemon on; master_pr
+           └─13065 nginx: worker process
+
+Jun 16 22:59:51 ip-10-0-1-209 systemd[1]: Starting A high performance web server
+Jun 16 22:59:51 ip-10-0-1-209 systemd[1]: nginx.service: Failed to parse PID fro
+Jun 16 22:59:51 ip-10-0-1-209 systemd[1]: Started A high performance web server
+lines 1-16/16 (END)
+
+Get your IP and open it with browser to make sure Nginx is serving its default page:
+
+$ curl -s domain.com
+$ curl -s Ip_address
+
+Now browse to http://your-ip-here and you should see the Nginx default page “Welcome to Nginx”.
+
+Set Up your nginx configs:
+
+$ sudo mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default_back
+$ sudo nano /etc/nginx/sites-available/default
+
+Copy and paste this config (change ipfs.geekdecoder.com to your domain)
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name your_domain_name.com;
+
+    location /api/v0/add {
+        proxy_pass http://localhost:5001;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        allow all;
+    }
+
+    location /ipfs {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        allow all;
+    }
+
+    location / {
+        proxy_pass http://localhost:5001;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        deny all; # <- Deny other traffic
+    }
+
+#Uncomment below if adding ssl cert with certbot
+#    listen [::]:443 ssl ipv6only=on; # managed by Certbot
+#    listen 443 ssl; # managed by Certbot
+#    ssl_certificate /etc/letsencrypt/live/ipfs.dsla.network/fullchain.pem; # managed by Certbot
+#    ssl_certificate_key /etc/letsencrypt/live/ipfs.dsla.network/privkey.pem; # managed by Certbot
+#    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+#    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+#server {
+#    if ($host =  ) {
+#        return 301 https://host
+#request_uri;
+#    } # managed by Certbot
+
+
+#        listen 80 ;
+#        listen [::]:80 ;
+#    server_name ;
+#    return 404; # managed by Certbot
+
+Test that new config syntax and make sure it is ok:
+
+$ sudo nginx -t
+
+If all good reload:
+
+$ sudo systemctl reload nginx
+
+The setup here does not include an SSL cert but should. If yu do install certbot and enable SSL, you can modify the server block to include it.
+
+Now there are changes to IPFS here.
+Run there commands to set up a public gateway.
+
+$ ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http://your_domain_name.com:5001", "http://localhost:3000", "http://127.0.0.1:5001", "https://webui.ipfs.io"]'
+$ ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST"]'
+$ ipfs config Addresses.API /ip4/0.0.0.0/tcp/5001
+$ ipfs config Addresses.Gateway /ip4/127.0.0.1/tcp/8080
+
+Restart IPFS
+
+$ sudo systemctl restart ipfs
+

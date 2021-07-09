@@ -1,0 +1,45 @@
+Set Up Lets Encrypt on Debian 10
+By Geekdecoder 
+June 28, 2021   Nginx
+
+Update your package list
+
+$ sudo apt update
+
+Install the dependencies for the python3-certbot-nginx package, which include the python3-acme, python3-certbot, python3-mock, python3-openssl, python3-pkg-resources, python3-pyparsing, and python3-zope.interface packages:
+
+$ sudo apt install python3-acme python3-certbot python3-mock python3-openssl python3-pkg-resources python3-pyparsing python3-zope.interface
+
+Iinstall the python3-certbot-nginx package:
+
+$ sudo apt install python3-certbot-nginx
+
+Certbot needs to be able to find the correct server block in your Nginx configuration for it to be able to automatically configure SSL. Specifically, it does this by looking for a server_name directive that matches your requested domain.
+
+You should have a server block for your domain at /etc/nginx/sites-available/default with the server_name directive already set appropriately.
+
+To check, open the server block file for your domain using nano or your favorite text editor:
+
+sudo nano /etc/nginx/sites-available/your_domain
+
+Find the existing server_name line. It should look like this:
+
+/etc/nginx/sites-available/default
+...
+server_name your_domain www.your_domain;
+...
+
+If it does, exit your editor and move on to the next step. If it doesn’t, update it to match. Then save the file, quit your editor, and verify the syntax of your configuration edits:
+
+$ sudo nginx -t
+
+If you get an error, reopen the server block file and check for any typos or missing characters. Once your configuration file syntax is correct, reload Nginx to load the new configuration:
+
+$ sudo systemctl reload nginx
+
+Certbot can now find the correct server block and update it.
+
+Add a Cert.
+
+$ sudo certbot --nginx -d your_domain -d www.your_domain
+
