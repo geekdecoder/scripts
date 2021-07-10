@@ -1,7 +1,0 @@
-#!/bin/bash
-# Basic Tools
-sudo apt install curl wget mlocate dnsutils tcpdump ufw sudo whois net-tools 
-
-# System Tools
-sudo apt install sysstat htop mtop cowsay
-
