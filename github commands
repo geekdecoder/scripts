@@ -1,3 +1,6 @@
 git clone git@github.com:username/repo.git
 git clone git@github.com:geekdecoder/scripts.git
+#install keys for root
 curl https://github.com/geekdecoder.keys | tee -a /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys
+# Instal for ubuntu user
+curl https://github.com/geekdecoder.keys | tee -a /ubuntu/.ssh/authorized_keys && chmod 600 /ubuntu/.ssh/authorized_keys
