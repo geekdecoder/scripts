@@ -1,0 +1,20 @@
+#!/bin/bash
+# update server
+apt update & apt upgrade -y
+#install nano and other apps
+# Basic Tools
+apt install curl wget mlocate dnsutils tcpdump fail2ban ufw sudo whois net-tools sysstat htop nano
+#install apache
+apt install apache2 -y
+systemctl start apache2
+systemctl enable apache2
+#Install database
+apt install mariadb-server -y
+systemctl start mariadb
+systemctl enable mariadb
+apt install php php-fpm php-mysqlnd php-opcache php-gd php-curl php-xml libapache2-mod-php php-zip php-mbstring php-cli php-common php-curl php-xml php-mysql-y
+mysql_secure_installation
+systemctl start php-fpm
+systemctl enable php-fpm
+echo "All Done..."
+exit 0
